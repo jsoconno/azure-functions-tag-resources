@@ -15,7 +15,7 @@ on:
  
 env:
   FUNCTION_NAME: tag-resources    # This name needs to be globally unique
-  SCRIPT_PATH: '.'      # set this to the path where your PowerShell code is stored.
+  SCRIPT_PATH: '.\tag-resources'      # set this to the path where your PowerShell code is stored.
   RESOURCE_GROUP: RGP-USE-CORE-DEV
   LOCATION: 'eastus'
  
