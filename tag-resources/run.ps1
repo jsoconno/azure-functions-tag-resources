@@ -11,6 +11,7 @@ if ($null -eq $caller) {
         }
     }
 }
+Write-Host $eventGridEvent.data
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
