@@ -4,11 +4,7 @@ name: Deploy Azure Function
  
 # Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  # Triggers the workflow based on a release being published.
   release:
     types:
       - released
