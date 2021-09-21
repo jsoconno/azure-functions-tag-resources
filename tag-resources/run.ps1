@@ -30,7 +30,7 @@ foreach ($case in $ignore) {
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
 
-if (!($tags.TagsProperty.ContainsKey('Creator')) -or ($null -eq $tags)) {
+if (!($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
     $tag = @{
         CreatedBy = $caller;
         CreatedDate=$(Get-Date);
