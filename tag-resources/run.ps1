@@ -36,7 +36,7 @@ if (!($tags.TagsProperty.ContainsKey('Creator')) -or ($null -eq $tags)) {
         CreatedDate=$(Get-Date);
     }
     Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
-    Write-Host "Added creater tag with user: $caller"
+    Write-Host "Added CreatedBy tag with user: $caller"
 }
 else {
     Write-Host "Tag already exists"
@@ -45,5 +45,5 @@ else {
         ModifiedDate=$(Get-Date);
     }
     Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
-    Write-Host "Added or updated modified by tag with user: $caller"
+    Write-Host "Added or updated ModifiedBy tag with user: $caller"
 }
