@@ -1,7 +1,7 @@
 param($eventGridEvent, $TriggerMetadata)
 
 $caller = $eventGridEvent.data.claims.name
-$lastOperation = $eventGridEvent.data.operationName.localizedValue
+$lastOperation = $eventGridEvent.data.operationName
 
 if ($null -eq $caller) {
     if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
@@ -13,9 +13,7 @@ if ($null -eq $caller) {
     }
 }
 
-$eventData = $eventGridEvent.data.operationName | Out-String
-Write-Host $eventData
-
+Write-Host "Operation Name: $operationName"
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
