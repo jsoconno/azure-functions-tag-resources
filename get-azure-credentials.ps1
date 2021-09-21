@@ -24,7 +24,7 @@
     .LINK
         None
     .NOTES
-		You should add azure-credentials.json to your .gitignore file so that you don't accidentally commit your service principal details to GitHub.
+		You should add azure-credentials.json to your .gitignore file so that you don't accidentally commit your service principal details to GitHub.  Once you have this info, you should create a secret on GitHub, name it AZURE_CREDS, and past in the JSON generated from this script for use in the pipeline.
 #>
 
 param(

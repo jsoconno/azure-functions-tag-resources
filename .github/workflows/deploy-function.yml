@@ -1,35 +1,76 @@
-name: PowerShell Function Tag Resources
-
+# This is a basic workflow to help you get started with Actions
+ 
+name: Deploy Azure Function
+ 
+# Controls when the action will run. 
 on:
-  [push]
-
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+ 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+ 
 env:
-  AZURE_FUNCTIONAPP_NAME: tag-resources
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
-  DOTNET_VERSION: '2.2.402'
-
+  FUNCTION_NAME: tag-resources    # This name needs to be globally unique
+  SCRIPT_PATH: '.'      # set this to the path where your PowerShell code is stored.
+  RESOURCE_GROUP: RGP-USE-CORE-DEV
+  LOCATION: 'eastus'
+ 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build-and-deploy:
+  # This workflow contains a single job called "build"
+  deploy:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+ 
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@main
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
 
-    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Azure Login
+        uses: Azure/login@v1.1
+        with:
+          creds: ${{ secrets.AZURE_CREDS }}
+          enable-AzPSSession: true
 
-    - name: 'Resolve Project Dependencies Using Dotnet'
-      shell: bash
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --configuration Release --output ./output
-        popd
-    - name: 'Run Azure Functions Action'
-      uses: Azure/functions-action@v1
-      id: fa
-      with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+      - name: Azure PowerShell Action
+        uses: Azure/powershell@v1
+        with:
+          # Specify the Az PowerShell script here.
+          inlineScript: 
+            .\run.ps1 -FunctionName ${{ env.FUNCTION_NAME }} -FunctionResourceGroup ${{ env.RESOURCE_GROUP }} -Location ${{ env.LOCATION }}
+          # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
+          azPSVersion: latest
+
+      - name: Azure App Service Publish Profile
+        uses: aliencube/publish-profile-actions@v1.2.0
+        id: publishprofile
+        with:
+          # Resource group name.
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          # App instance name.
+          appName: ${{ env.FUNCTION_NAME }}
+
+      - name: Azure Functions Action
+        uses: Azure/functions-action@v1.1.8
+        with:
+          # Name of the Azure Function App
+          app-name: ${{ env.FUNCTION_NAME }}
+          # Path to package or folder. *.zip or a folder to deploy
+          package: ${{ env.SCRIPT_PATH }}
+          # Publish profile (*.publishsettings) file contents with web deploy secrets
+          publish-profile: ${{ steps.publishprofile.outputs.profile }}  
+
+      - name: Azure App Service Publish Profile
+        uses: aliencube/publish-profile-actions@v1.2.0
+        with:
+          # Resource group name.
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          # App instance name.
+          appName: ${{ env.FUNCTION_NAME }}
+          # Value indicating whether to reset the publish profile or not.        
+          reset: true
