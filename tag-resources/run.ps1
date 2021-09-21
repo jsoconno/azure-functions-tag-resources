@@ -1,6 +1,7 @@
 param($eventGridEvent, $TriggerMetadata)
 
 $caller = $eventGridEvent.data.claims.name
+$lastOperation = $eventGridEvent.data.operationName.localizedValue
 if ($null -eq $caller) {
     if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
         $caller = (Get-AzADServicePrincipal -ObjectId $eventGridEvent.data.authorization.evidence.principalId).DisplayName
@@ -33,7 +34,8 @@ $tags = (Get-AzTag -ResourceId $resourceId).Properties
 if (!($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
     $tag = @{
         CreatedBy = $caller;
-        CreatedDate=$(Get-Date);
+        CreatedDate = $(Get-Date);
+        LastOperation = $lastOperation;
     }
     Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
     Write-Host "Added CreatedBy tag with user: $caller"
@@ -42,7 +44,8 @@ else {
     Write-Host "Tag already exists"
     $tag = @{
         ModifiedBy = $caller;
-        ModifiedDate=$(Get-Date);
+        ModifiedDate = $(Get-Date);
+        LastOperation = $lastOperation;
     }
     Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
     Write-Host "Added or updated ModifiedBy tag with user: $caller"
