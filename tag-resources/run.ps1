@@ -2,6 +2,7 @@ param($eventGridEvent, $TriggerMetadata)
 
 $caller = $eventGridEvent.data.claims.name
 $lastOperation = $eventGridEvent.data.operationName.localizedValue
+
 if ($null -eq $caller) {
     if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
         $caller = (Get-AzADServicePrincipal -ObjectId $eventGridEvent.data.authorization.evidence.principalId).DisplayName
@@ -11,7 +12,10 @@ if ($null -eq $caller) {
         }
     }
 }
-Write-Host $eventGridEvent.data
+
+$eventData = $eventGridEvent.data | Out-String
+Write-Host $eventData
+
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
