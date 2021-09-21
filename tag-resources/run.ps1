@@ -13,7 +13,7 @@ if ($null -eq $caller) {
     }
 }
 
-$eventData = $eventGridEvent.data | Out-String
+$eventData = $eventGridEvent.data.operationName | Out-String
 Write-Host $eventData
 
 Write-Host "Caller: $caller"
