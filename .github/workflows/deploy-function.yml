@@ -9,13 +9,16 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  release:
+    types:
+      - released
  
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
  
 env:
   FUNCTION_NAME: tag-resources    # This name needs to be globally unique
-  SCRIPT_PATH: '.\tag-resources'      # set this to the path where your PowerShell code is stored.
+  SCRIPT_PATH: '.'      # set this to the path where your PowerShell code is stored.
   RESOURCE_GROUP: RGP-USE-CORE-DEV
   LOCATION: 'eastus'
  
@@ -42,7 +45,7 @@ jobs:
         with:
           # Specify the Az PowerShell script here.
           inlineScript: 
-            ${{ env.SCRIPT_PATH }}\run.ps1 -FunctionName ${{ env.FUNCTION_NAME }} -FunctionResourceGroup ${{ env.RESOURCE_GROUP }} -Location ${{ env.LOCATION }}
+            ${{ env.SCRIPT_PATH }}tag-resources\run.ps1 -FunctionName ${{ env.FUNCTION_NAME }} -FunctionResourceGroup ${{ env.RESOURCE_GROUP }} -Location ${{ env.LOCATION }}
           # Azure PS version to be used to execute the script, example: 1.8.0, 2.8.0, 3.4.0. To use the latest version, specify "latest".
           azPSVersion: latest
 
