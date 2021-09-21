@@ -86,4 +86,7 @@ If you have issues while running the the function, you can always restart the cu
 ## Deploy your code to Azure
 Click the Deploy to Function App… () icon in the Azure: Functions panel.
 
-When prompted to select a function app, choose fun-use-core-dev.
+When prompted to select a function app, choose the correct app.
+
+If deploying a function app from GitHub, you should check out this documentation:
+https://github.com/Azure/functions-action
