@@ -13,6 +13,8 @@ if ($null -eq $caller) {
     }
 }
 
+Write-Host "Authorization Action: $($eventGridEvent.data.authorization.action)"
+Write-Host "Authorization Scope: $($eventGridEvent.data.authorization.scope)"
 Write-Host "Operation Name: $operationName"
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
