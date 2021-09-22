@@ -9,9 +9,6 @@ on:
     types:
       - released
       - prereleased
-  push:
-    branches:
-      - hotfix-allow-prerelease-deployment
  
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
