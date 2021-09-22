@@ -15,7 +15,6 @@ function Test-TagUpdate {
             $_ | Set-AzResource -Tags $_.Tags -ErrorAction SilentlyContinue -Force
         }
         Get-AzTag -ResourceId $ResourceID
-        Remove-AzTag -Name "Test"
         Return "Pass"
     } catch {
         Write-Host $Error[0]
