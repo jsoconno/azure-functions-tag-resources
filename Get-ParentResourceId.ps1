@@ -13,12 +13,13 @@ function Get-ParentResourceId {
         if (!($IgnoreList -Contains $CurrentHead)) {
             Write-Host "Trying to get tags for $($CurrentResourceID)" 
             try {
-                $value = Get-AzTag -ResourceId $CurrentResourceID -ErrorAction silentlycontinue
-                if ($value -ne $Null) {
+                $Tags = Get-AzTag -ResourceId $CurrentResourceID -ErrorAction silentlycontinue
+                if ($Null -ne $Tags) {
                     Write-Host "Found tags for resource $($CurrentResourceID)"
                     Break
                 }
             } catch {
+                Write-Host $Error[0]
                 Write-Host "$($CurrentResourceID) cannot be tagged.  Searching for parent."
             }
         } else {

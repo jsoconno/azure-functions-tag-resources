@@ -3,5 +3,5 @@
 #
 @{
     'Az.Accounts'  = '1.8.0'
-    'Az.Resources' = '2.0.1'
+    'Az.Resources' = '2.5.0'
 }
