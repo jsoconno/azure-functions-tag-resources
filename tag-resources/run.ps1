@@ -1,5 +1,5 @@
 #Import function
-../get-parent-resource-id.ps1
+. ..\get-parent-resource-id.ps1
 
 param($eventGridEvent, $TriggerMetadata)
 
