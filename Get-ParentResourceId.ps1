@@ -15,6 +15,7 @@ function Test-TagUpdate {
             $_ | Set-AzResource -Tags $_.Tags -ErrorAction SilentlyContinue -Force
         }
         Get-AzTag -ResourceId $ResourceID
+        Remove-AzTag -Name "Test"
         Return "Pass"
     } catch {
         Write-Host $Error[0]
@@ -60,7 +61,3 @@ function Get-ParentResourceId {
 
     Return $CurrentResourceID
 }
-
-$ResourceID = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.Storage/storageAccounts/stouseinfrabotdev/blobServices/default/containers/test"
-
-Get-ParentResourceId -ResourceId $ResourceID
