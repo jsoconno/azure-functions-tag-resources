@@ -90,3 +90,22 @@ When prompted to select a function app, choose the correct app.
 
 If deploying a function app from GitHub, you should check out this documentation:
 https://github.com/Azure/functions-action
+
+## Useful Info
+
+When calling `$eventGrid.data` the available options for "dotting" into the data are as follows:
+```
+INFORMATION: 
+Name                           Value
+----                           -----
+claims                         {ipaddr, uti, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier, xms_…
+authorization                  {action, evidence, scope}
+correlationId                  00000000-0000-0000-0000-000000000000
+status                         Succeeded
+resourceProvider               Microsoft.Resources
+resourceUri                    /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-name
+operationName                  Microsoft.Resources/subscriptions/resourceGroups/write
+httpRequest                    {method, clientIpAddress, clientRequestId, url}
+tenantId                       00000000-0000-0000-0000-000000000000
+subscriptionId                 00000000-0000-0000-0000-000000000000
+```

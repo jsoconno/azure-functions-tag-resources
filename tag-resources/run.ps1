@@ -1,7 +1,11 @@
+#Import function
+../get-parent-resource-id.ps1
+
 param($eventGridEvent, $TriggerMetadata)
 
 $caller = $eventGridEvent.data.claims.name
-$lastOperation = $eventGridEvent.data.operationName.localizedValue
+$lastOperation = $eventGridEvent.data.operationName
+
 if ($null -eq $caller) {
     if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
         $caller = (Get-AzADServicePrincipal -ObjectId $eventGridEvent.data.authorization.evidence.principalId).DisplayName
@@ -11,6 +15,10 @@ if ($null -eq $caller) {
         }
     }
 }
+
+# Write-Host "Authorization Action: $($eventGridEvent.data.authorization.action)"
+Write-Host "Authorization Scope: $($eventGridEvent.data.authorization.scope)"
+Write-Host "Operation Name: $($eventGridEvent.data.authorization.action)"
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
@@ -28,6 +36,8 @@ foreach ($case in $ignore) {
         exit;
     }
 }
+
+$resourceId = Get-ParentResourceId -ResourceId $resourceId
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
 
