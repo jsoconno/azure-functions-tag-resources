@@ -1,3 +1,27 @@
+function Test-TagUpdate {
+    param(
+        $ResourceID
+    )
+
+    $Tag = @{"Test" = "Test"}
+
+    try {
+        Update-AzTag -ResourceId $ResourceID -Operation Merge -Tag $Tag -ErrorAction SilentlyContinue
+        $Resource = Get-AzResource -ResourceId $ResourceID -ErrorAction SilentlyContinue
+        $Resource.ForEach{
+            if ($_.Tags.ContainsKey("Test")) {
+                $_.Tags.Remove("Test")
+            }
+            $_ | Set-AzResource -Tags $_.Tags -ErrorAction SilentlyContinue -Force
+        }
+        Get-AzTag -ResourceId $ResourceID
+        Return "Pass"
+    } catch {
+        Write-Host $Error[0]
+        Return "Fail"
+    }
+}
+
 function Get-ParentResourceId {
     param(
         $ResourceID
@@ -16,7 +40,14 @@ function Get-ParentResourceId {
                 $Tags = Get-AzTag -ResourceId $CurrentResourceID -ErrorAction silentlycontinue
                 if ($Null -ne $Tags) {
                     Write-Host "Found tags for resource $($CurrentResourceID)"
-                    Break
+                    try {
+                        $TestResult = Test-TagUpdate -ResourceId $CurrentResourceID
+                        if ($TestResult -eq "Pass") {
+                            Break
+                        }
+                    } catch {
+                        "Test for tagging resource failed: $CurrentResourceID.  Continuing search."
+                    }
                 }
             } catch {
                 Write-Host $Error[0]
@@ -29,3 +60,7 @@ function Get-ParentResourceId {
 
     Return $CurrentResourceID
 }
+
+$ResourceID = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.Storage/storageAccounts/stouseinfrabotdev/blobServices/default/containers/test"
+
+Get-ParentResourceId -ResourceId $ResourceID

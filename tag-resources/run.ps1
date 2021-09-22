@@ -1,5 +1,29 @@
 param($eventGridEvent, $TriggerMetadata)
 
+function Test-TagUpdate {
+    param(
+        $ResourceID
+    )
+
+    $Tag = @{"Test" = "Test"}
+
+    try {
+        Update-AzTag -ResourceId $ResourceID -Operation Merge -Tag $Tag -ErrorAction SilentlyContinue
+        $Resource = Get-AzResource -ResourceId $ResourceID -ErrorAction SilentlyContinue
+        $Resource.ForEach{
+            if ($_.Tags.ContainsKey("Test")) {
+                $_.Tags.Remove("Test")
+            }
+            $_ | Set-AzResource -Tags $_.Tags -ErrorAction SilentlyContinue -Force
+        }
+        Get-AzTag -ResourceId $ResourceID
+        Return "Pass"
+    } catch {
+        Write-Host $Error[0]
+        Return "Fail"
+    }
+}
+
 function Get-ParentResourceId {
     param(
         $ResourceID
@@ -18,11 +42,18 @@ function Get-ParentResourceId {
                 $Tags = Get-AzTag -ResourceId $CurrentResourceID -ErrorAction silentlycontinue
                 if ($Null -ne $Tags) {
                     Write-Host "Found tags for resource $($CurrentResourceID)"
-                    Break
+                    try {
+                        $TestResult = Test-TagUpdate -ResourceId $CurrentResourceID
+                        if ($TestResult -eq "Pass") {
+                            Break
+                        }
+                    } catch {
+                        "Test for tagging resource failed: $CurrentResourceID.  Continuing search."
+                    }
                 }
             } catch {
-                Write-Host "$($CurrentResourceID) cannot be tagged.  Searching for parent."
                 Write-Host $Error[0]
+                Write-Host "$($CurrentResourceID) cannot be tagged.  Searching for parent."
             }
         } else {
             Write-Host "Skipping $($CurrentResourceID)"
@@ -66,6 +97,7 @@ foreach ($case in $ignore) {
     }
 }
 
+# Get first taggable resource
 $resourceId = Get-ParentResourceId -ResourceId $resourceId
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
@@ -82,8 +114,8 @@ if (-not ($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
 else {
     Write-Host "Tag already exists"
     $tag = @{
-        ModifiedBy = $caller;
-        ModifiedDate = $(Get-Date);
+        LastModifiedBy = $caller;
+        LastModifiedDate = $(Get-Date);
         LastOperation = $lastOperation;
     }
     Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
