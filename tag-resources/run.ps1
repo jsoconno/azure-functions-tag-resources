@@ -1,4 +1,4 @@
-. ..\Get-ParentResourceId.ps1
+. .\Get-ParentResourceId.ps1
 
 param($eventGridEvent, $TriggerMetadata)
 
