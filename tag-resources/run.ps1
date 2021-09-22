@@ -1,3 +1,6 @@
+#Import function
+../get-parent-resource-id.ps1
+
 param($eventGridEvent, $TriggerMetadata)
 
 $caller = $eventGridEvent.data.claims.name
@@ -33,6 +36,8 @@ foreach ($case in $ignore) {
         exit;
     }
 }
+
+$resourceId = Get-ParentResourceId -ResourceId $resourceId
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
 
