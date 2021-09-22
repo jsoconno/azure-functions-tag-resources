@@ -33,7 +33,7 @@ function Get-ParentResourceId {
 }
 
 $caller = $eventGridEvent.data.claims.name
-$lastOperation = $eventGridEvent.data.operationName
+$lastOperation = $eventGridEvent.data.authorization.action
 
 if ($null -eq $caller) {
     if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
@@ -47,7 +47,7 @@ if ($null -eq $caller) {
 
 # Write-Host "Authorization Action: $($eventGridEvent.data.authorization.action)"
 Write-Host "Authorization Scope: $($eventGridEvent.data.authorization.scope)"
-Write-Host "Operation Name: $($eventGridEvent.data.authorization.action)"
+Write-Host "Operation Name: $lastOperation"
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
