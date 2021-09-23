@@ -102,7 +102,7 @@ if (($null -eq $caller) -or ($null -eq $resourceId)) {
     exit;
 }
 
-$ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write")
+$ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "/tags/")
 
 foreach ($case in $ignore) {
     if ($resourceId -match $case) {
