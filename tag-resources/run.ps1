@@ -103,7 +103,7 @@ if (($null -eq $caller) -or ($null -eq $resourceId)) {
     exit;
 }
 
-$ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "/tags/")
+$ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags")
 
 foreach ($case in $ignore) {
     if ($resourceId -match $case) {
@@ -129,11 +129,11 @@ if (!($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
 }
 else {
     Write-Host "Tag already exists"
-    $tag = @{
-        LastModifiedBy = $caller;
-        LastModifiedDate = $(Get-Date);
-        LastOperation = $lastOperation;
-    }
-    Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
-    Write-Host "Added or updated ModifiedBy tag with user: $caller"
+    # $tag = @{
+    #     LastModifiedBy = $caller;
+    #     LastModifiedDate = $(Get-Date);
+    #     LastOperation = $lastOperation;
+    # }
+    # Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
+    # Write-Host "Added or updated ModifiedBy tag with user: $caller"
 }
