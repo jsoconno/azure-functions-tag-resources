@@ -6,12 +6,20 @@ function Add-Tag {
         $TagKey,
         $TagValue
     )
-    $Resource = Get-AzResource -ResourceId $ResourceID
-    $Resource.ForEach{
-        if (!($_.Tags.ContainsKey($TagKey))) {
-            $_.Tags.Add($TagKey, $TagValue)
+    try {
+        $Resource.ForEach{
+            if (!($_.Tags.ContainsKey($TagKey))) {
+                $_.Tags.Add($TagKey, $TagValue)
+            }
+            $_ | Set-AzResource -Tags $_.Tags -Force
         }
-        $_ | Set-AzResource -Tags $_.Tags -Force
+    } catch {
+        # $e = $_.Exception
+        # $line = $_.InvocationInfo.ScriptLineNumber
+        # $msg = $e.Message
+        # $func = $MyInvocation.MyCommand
+        # Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
+        Throw $_.Exception
     }
 }
 
@@ -20,12 +28,21 @@ function Remove-Tag {
         $ResourceID,
         $TagKey
     )
-    $Resource = Get-AzResource -ResourceId $ResourceID
-    $Resource.ForEach{
-        if ($_.Tags.ContainsKey($TagKey)) {
-            $_.Tags.Remove($TagKey)
+    try {
+        $Resource = Get-AzResource -ResourceId $ResourceID -ErrorAction Stop
+        $Resource.ForEach{
+            if ($_.Tags.ContainsKey($TagKey)) {
+                $_.Tags.Remove($TagKey)
+            }
+            $_ | Set-AzResource -Tags $_.Tags -Force
         }
-        $_ | Set-AzResource -Tags $_.Tags -Force
+    } catch {
+        # $e = $_.Exception
+        # $line = $_.InvocationInfo.ScriptLineNumber
+        # $msg = $e.Message
+        # $func = $MyInvocation.MyCommand
+        # Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
+        Throw $_.Exception
     }
 }
 
@@ -37,12 +54,16 @@ function Test-TagUpdate {
     $Tag = @{"Test" = "Test"}
 
     try {
-        Add-Tag -ResourceId $ResourceID -TagKey "Test" -TagValue "Test" -ErrorAction SilentlyContinue
-        Remove-Tag -ResourceId $ResourceID -TagKey "Test"
-        Get-AzTag -ResourceId $ResourceID
+        Add-Tag -ResourceId $ResourceID -TagKey "Test" -TagValue "Test" -ErrorAction Stop
+        Remove-Tag -ResourceId $ResourceID -TagKey "Test" -ErrorAction Stop
+        Get-AzTag -ResourceId $ResourceID -ErrorAction Stop
         Return "Pass"
     } catch {
-        Write-Host $Error[0]
+        $e = $_.Exception
+        $line = $_.InvocationInfo.ScriptLineNumber
+        $msg = $e.Message
+        $func = $MyInvocation.MyCommand
+        Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
         Return "Fail"
     }
 }
@@ -60,26 +81,32 @@ function Get-ParentResourceId {
         $CurrentResourceID = $CurrentResourceIDList -Join '/'
         $CurrentHead = $CurrentResourceIDList[-1]
         if (!($IgnoreList -Contains $CurrentHead)) {
-            Write-Host "Trying to get tags for $($CurrentResourceID)" 
+            Write-Host "Validating ability to tag $($CurrentResourceID)" 
+            $Error.clear()
             try {
-                $Tags = Get-AzTag -ResourceId $CurrentResourceID -ErrorAction silentlycontinue
-                if ($Null -ne $Tags) {
-                    Write-Host "Found tags for resource $($CurrentResourceID)"
-                    try {
-                        $TestResult = Test-TagUpdate -ResourceId $CurrentResourceID
-                        if ($TestResult -eq "Pass") {
-                            Break
-                        }
-                    } catch {
-                        "Test for tagging resource failed: $CurrentResourceID.  Continuing search."
-                    }
+                $Resource = Get-AzResource -ResourceId $CurrentResourceID -ErrorAction Stop
+                $Tags = $Resource.Tags
+                try {
+                    Write-Host "Running tagging test..."
+                    Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test"
+                    Remove-Tag -ResourceID $CurrentResourceID -TagKey "Test"
+                } catch {
+                    Write-Host "Test failed." -ForegroundColor Red
                 }
             } catch {
-                Write-Host $Error[0]
+                $e = $_.Exception
+                $line = $_.InvocationInfo.ScriptLineNumber
+                $msg = $e.Message
+                $func = $MyInvocation.MyCommand
+                Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
                 Write-Host "$($CurrentResourceID) cannot be tagged.  Searching for parent."
             }
+            if (!$Error) {
+                Write-Host "Test passed." -ForegroundColor Green
+                Break
+            }
         } else {
-            Write-Host "Skipping $($CurrentResourceID)"
+            Write-Host "Skipping resource $($CurrentResourceID)."
         }
     }
 
