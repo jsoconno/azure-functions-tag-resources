@@ -46,28 +46,6 @@ function Remove-Tag {
     }
 }
 
-function Test-TagUpdate {
-    param(
-        $ResourceID
-    )
-
-    $Tag = @{"Test" = "Test"}
-
-    try {
-        Add-Tag -ResourceId $ResourceID -TagKey "Test" -TagValue "Test" -ErrorAction Stop
-        Remove-Tag -ResourceId $ResourceID -TagKey "Test" -ErrorAction Stop
-        Get-AzTag -ResourceId $ResourceID -ErrorAction Stop
-        Return "Pass"
-    } catch {
-        $e = $_.Exception
-        $line = $_.InvocationInfo.ScriptLineNumber
-        $msg = $e.Message
-        $func = $MyInvocation.MyCommand
-        Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
-        Return "Fail"
-    }
-}
-
 function Get-ParentResourceId {
     param(
         $ResourceID
@@ -84,8 +62,6 @@ function Get-ParentResourceId {
             Write-Host "Validating ability to tag $($CurrentResourceID)" 
             $Error.clear()
             try {
-                $Resource = Get-AzResource -ResourceId $CurrentResourceID -ErrorAction Stop
-                $Tags = $Resource.Tags
                 try {
                     Write-Host "Running tagging test..."
                     Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test"
