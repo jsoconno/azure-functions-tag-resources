@@ -54,8 +54,8 @@ function Get-ParentResourceId {
             try {
                 try {
                     Write-Host "Running tagging test..."
-                    Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test"
-                    Remove-Tag -ResourceID $CurrentResourceID -TagKey "Test"
+                    Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test" -ErrorAction SilentlyContinue
+                    Remove-Tag -ResourceID $CurrentResourceID -TagKey "Test" -ErrorAction SilentlyContinue
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
                 }
