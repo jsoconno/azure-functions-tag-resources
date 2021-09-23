@@ -1,3 +1,32 @@
+function Add-Tag {
+    param(
+        $ResourceID,
+        $TagKey,
+        $TagValue
+    )
+    $Resource = Get-AzResource -ResourceId $ResourceID
+    $Resource.ForEach{
+        if (!($_.Tags.ContainsKey($TagKey))) {
+            $_.Tags.Add($TagKey, $TagValue)
+        }
+        $_ | Set-AzResource -Tags $_.Tags -Force
+    }
+}
+
+function Remove-Tag {
+    param(
+        $ResourceID,
+        $TagKey
+    )
+    $Resource = Get-AzResource -ResourceId $ResourceID
+    $Resource.ForEach{
+        if ($_.Tags.ContainsKey($TagKey)) {
+            $_.Tags.Remove($TagKey)
+        }
+        $_ | Set-AzResource -Tags $_.Tags -Force
+    }
+}
+
 function Test-TagUpdate {
     param(
         $ResourceID
@@ -6,14 +35,8 @@ function Test-TagUpdate {
     $Tag = @{"Test" = "Test"}
 
     try {
-        Update-AzTag -ResourceId $ResourceID -Operation Merge -Tag $Tag -ErrorAction SilentlyContinue
-        $Resource = Get-AzResource -ResourceId $ResourceID -ErrorAction SilentlyContinue
-        $Resource.ForEach{
-            if ($_.Tags.ContainsKey("Test")) {
-                $_.Tags.Remove("Test")
-            }
-            $_ | Set-AzResource -Tags $_.Tags -ErrorAction SilentlyContinue -Force
-        }
+        Add-Tag -ResourceId $ResourceID -TagKey "Test" -TagValue "Test" -ErrorAction SilentlyContinue
+        Remove-Tag -ResourceId $ResourceID -TagKey "Test"
         Get-AzTag -ResourceId $ResourceID
         Return "Pass"
     } catch {
@@ -60,3 +83,7 @@ function Get-ParentResourceId {
 
     Return $CurrentResourceID
 }
+
+# $ResourceIDPass = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.Storage/storageAccounts/stouseinfrabotdev"
+# $ResourceIDFail = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.Storage/storageAccounts/stouseinfrabotdev/blobServices/default/containers/test"
+# Get-ParentResourceId -ResourceID $ResourceIDFail
