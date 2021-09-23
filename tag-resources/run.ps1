@@ -14,11 +14,6 @@ function Add-Tag {
             $_ | Set-AzResource -Tags $_.Tags -Force
         }
     } catch {
-        # $e = $_.Exception
-        # $line = $_.InvocationInfo.ScriptLineNumber
-        # $msg = $e.Message
-        # $func = $MyInvocation.MyCommand
-        # Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
         Throw $_.Exception
     }
 }
@@ -37,11 +32,6 @@ function Remove-Tag {
             $_ | Set-AzResource -Tags $_.Tags -Force
         }
     } catch {
-        # $e = $_.Exception
-        # $line = $_.InvocationInfo.ScriptLineNumber
-        # $msg = $e.Message
-        # $func = $MyInvocation.MyCommand
-        # Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
         Throw $_.Exception
     }
 }
@@ -70,11 +60,7 @@ function Get-ParentResourceId {
                     Write-Host "Test failed." -ForegroundColor Red
                 }
             } catch {
-                $e = $_.Exception
-                $line = $_.InvocationInfo.ScriptLineNumber
-                $msg = $e.Message
-                $func = $MyInvocation.MyCommand
-                Write-Host -ForegroundColor Red "The function $func had and error on line $line with the following message:`n $e"
+                Throw $_.Exception
                 Write-Host "$($CurrentResourceID) cannot be tagged.  Searching for parent."
             }
             if (!$Error) {
