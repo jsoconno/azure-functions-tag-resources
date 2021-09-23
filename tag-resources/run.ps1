@@ -1,6 +1,6 @@
 param($eventGridEvent, $TriggerMetadata)
 
-$ErrorActionPreference = "Continue"
+$ErrorActionPreference = "SilentlyContinue"
 
 function Add-Tag {
     param(
