@@ -1,5 +1,7 @@
 param($eventGridEvent, $TriggerMetadata)
 
+$ErrorActionPreference = "Continue"
+
 function Add-Tag {
     param(
         $ResourceID,
