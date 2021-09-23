@@ -96,6 +96,7 @@ Write-Host "Operation Name: $lastOperation"
 Write-Host "Caller: $caller"
 $resourceId = $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
+Write-Host "Human Readable Action: $($eventGridEvent.data.operationName.localizedValue)"
 
 if (($null -eq $caller) -or ($null -eq $resourceId)) {
     Write-Host "ResourceId or Caller is null"
