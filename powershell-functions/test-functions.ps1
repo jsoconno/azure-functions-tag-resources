@@ -81,5 +81,5 @@ function Get-ParentResourceId {
 }
 
 $ResourceIDPass = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.KeyVault/vaults/kvl-use-infrabot-dev"
-$ResourceIDFail = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.Storage/storageAccounts/stouseinfrabotdev/blobServices/default/containers"
+$ResourceIDFail = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/delete/providers/Microsoft.Authorization/roleAssignments/bff2bc4f-365f-4e58-b288-e67f701f0c65"
 Get-ParentResourceId -ResourceID $ResourceIDFail

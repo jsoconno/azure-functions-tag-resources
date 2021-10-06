@@ -113,7 +113,7 @@ foreach ($case in $ignore) {
 
 # # Get first taggable resource
 # $resourceId = Get-ParentResourceId -ResourceId $resourceId
-$resourceId = Get-ParentResourceId -ResourceId $resourceId
+$resourceId = $(Get-ParentResourceId -ResourceId $resourceId).id
 Write-Host "Attempting to tag $($resourceId)"
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
