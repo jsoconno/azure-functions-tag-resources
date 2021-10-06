@@ -116,7 +116,11 @@ foreach ($case in $ignore) {
 # # Get first taggable resource
 # $resourceId = Get-ParentResourceId -ResourceId $resourceId
 $scope = $eventGridEvent.data.authorization.scope
-$resourceId = $scope.replace("/providers/Microsoft.Resources/tags/default", "")
+if ($scope -like "*/providers/Microsoft.Resources/tags/default*") {
+    $resourceId = $scope.replace("/providers/Microsoft.Resources/tags/default", "")
+} else {
+    $resourceId = Get-ParentResourceId -ResourceId $resourceId
+}
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
 
