@@ -1,7 +1,5 @@
 param($eventGridEvent, $TriggerMetadata)
 
-$ErrorActionPreference = "SilentlyContinue"
-
 function Add-Tag {
     param(
         $ResourceID,
@@ -116,10 +114,14 @@ foreach ($case in $ignore) {
 # # Get first taggable resource
 # $resourceId = Get-ParentResourceId -ResourceId $resourceId
 $resourceId = Get-ParentResourceId -ResourceId $resourceId
+Write-Host "Attempting to tag $($resourceId)"
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
 
+Write-Host $tags
+
 if (!($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
+    Write-Host "Adding CreatedBy tags."
     $tag = @{
         CreatedBy = $Requestor;
         CreatedDate = $(Get-Date);
@@ -129,7 +131,7 @@ if (!($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
     Write-Host "Added CreatedBy tag with user: $Requestor"
 }
 else {
-    Write-Host "Tag already exists"
+    Write-Host "Adding ModifiedBy tags."
     $tag = @{
         LastModifiedBy = $Requestor;
         LastModifiedDate = $(Get-Date);
