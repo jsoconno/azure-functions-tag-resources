@@ -103,7 +103,7 @@ if (($null -eq $Requestor) -or ($null -eq $resourceId)) {
     exit;
 }
 
-$ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write")
+$ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "Microsoft.Authorization/policies/auditIfNotExists/action")
 
 foreach ($case in $ignore) {
     if ($Action -match $case) {
