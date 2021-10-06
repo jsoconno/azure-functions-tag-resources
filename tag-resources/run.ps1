@@ -1,41 +1,5 @@
 param($eventGridEvent, $TriggerMetadata)
 
-function Add-Tag {
-    param(
-        $ResourceID,
-        $TagKey,
-        $TagValue
-    )
-    try {
-        $Resource.ForEach{
-            if (!($_.Tags.ContainsKey($TagKey))) {
-                $_.Tags.Add($TagKey, $TagValue)
-            }
-            $_ | Set-AzResource -Tags $_.Tags -Force
-        }
-    } catch {
-        Throw $_.Exception
-    }
-}
-
-function Remove-Tag {
-    param(
-        $ResourceID,
-        $TagKey
-    )
-    try {
-        $Resource = Get-AzResource -ResourceId $ResourceID -ErrorAction Stop
-        $Resource.ForEach{
-            if ($_.Tags.ContainsKey($TagKey)) {
-                $_.Tags.Remove($TagKey)
-            }
-            $_ | Set-AzResource -Tags $_.Tags -Force
-        }
-    } catch {
-        Throw $_.Exception
-    }
-}
-
 function Get-ParentResourceId {
     param(
         $ResourceID
@@ -54,8 +18,6 @@ function Get-ParentResourceId {
             try {
                 try {
                     Write-Host "Running tagging test..."
-                    # Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test" -ErrorAction SilentlyContinue
-                    # Remove-Tag -ResourceID $CurrentResourceID -TagKey "Test" -ErrorAction SilentlyContinue
                     Get-AzTag -ResourceId $CurrentResourceID -ErrorAction SilentlyContinue
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
@@ -113,7 +75,7 @@ foreach ($case in $ignore) {
 
 # # Get first taggable resource
 # $resourceId = Get-ParentResourceId -ResourceId $resourceId
-$resourceId = $(Get-ParentResourceId -ResourceId $resourceId).id.replace("/providers/Microsoft.Resources/tags/default", "")
+$resourceId = $(Get-ParentResourceId -ResourceId $resourceId).id.replace("/providers/Microsoft.Resources/tags/default", "").replace("blobServices/default", "")
 Write-Host "Attempting to tag $($resourceId)"
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
