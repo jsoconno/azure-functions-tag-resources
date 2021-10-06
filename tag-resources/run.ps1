@@ -129,8 +129,7 @@ if (!($tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $tags)) {
     }
     Update-AzTag -ResourceId $resourceId -Operation Merge -Tag $tag
     Write-Host "Added CreatedBy tag with user: $Requestor"
-}
-else {
+} else {
     Write-Host "Adding ModifiedBy tags."
     $tag = @{
         LastModifiedBy = $Requestor;
