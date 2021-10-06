@@ -17,9 +17,9 @@ on:
   workflow_dispatch:
  
 env:
-  FUNCTION_NAME: fa-use-core-dev    # This name needs to be globally unique
+  FUNCTION_NAME: fa-eus-core-dev    # This name needs to be globally unique
   SCRIPT_PATH: '.'      # set this to the path where your PowerShell code is stored.
-  RESOURCE_GROUP: rg-use-core-d
+  RESOURCE_GROUP: rg-eus-core-d
   LOCATION: 'eastus'
  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
