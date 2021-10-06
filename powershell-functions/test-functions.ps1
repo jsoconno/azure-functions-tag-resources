@@ -2,7 +2,7 @@
 
 # $ErrorActionPreference = "Continue"
 
-$ErrorActionPreference = "SilentlyContinue"
+# $ErrorActionPreference = "SilentlyContinue"
 
 function Add-Tag {
     param(
@@ -60,7 +60,7 @@ function Get-ParentResourceId {
                     Write-Host "Running tagging test..."
                     # Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test" -ErrorAction SilentlyContinue
                     # Remove-Tag -ResourceID $CurrentResourceID -TagKey "Test" -ErrorAction SilentlyContinue
-                    Get-AzTag -ResourceId $CurrentResourceID -ErrorAction SilentlyContinue
+                    Get-AzTag -ResourceId $CurrentResourceID
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
                 }

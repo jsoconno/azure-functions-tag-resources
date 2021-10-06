@@ -95,7 +95,7 @@ if ($null -eq $Requestor) {
 Write-Host "Authorization Scope: $($eventGridEvent.data.authorization.scope)"
 Write-Host "Operation Name: $Action"
 Write-Host "Caller: $Requestor"
-$resourceId = $eventGridEvent.data.resourceUri
+$resourceId = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
 Write-Host "ResourceId: $resourceId"
 Write-Host "Human Readable Action: $($eventGridEvent.data.operationName.localizedValue)"
 
@@ -114,7 +114,9 @@ foreach ($case in $ignore) {
 }
 
 # # Get first taggable resource
-$resourceId = Get-ParentResourceId -ResourceId $resourceId
+# $resourceId = Get-ParentResourceId -ResourceId $resourceId
+$scope = $eventGridEvent.data.authorization.scope
+$resourceId = $scope.replace("/providers/Microsoft.Resources/tags/default", "")
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
 
