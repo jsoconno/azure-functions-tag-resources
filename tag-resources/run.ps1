@@ -75,7 +75,10 @@ foreach ($case in $ignore) {
 
 # # Get first taggable resource
 # $resourceId = Get-ParentResourceId -ResourceId $resourceId
-$resourceId = $(Get-ParentResourceId -ResourceId $resourceId).id.replace("/providers/Microsoft.Resources/tags/default", "").replace("/blobServices/default", "")
+$baseResourceId = $(Get-ParentResourceId -ResourceId $resourceId).id
+$cleanPostfixResourceId = $baseResourceId.replace("/providers/Microsoft.Resources/tags/default", "")
+$resourceId = $cleanPostfixResourceId.replace("/blobServices/default", "")
+# $resourceId = $(Get-ParentResourceId -ResourceId $resourceId).id.replace("/providers/Microsoft.Resources/tags/default", "").replace("/blobServices/default", "")
 Write-Host "Attempting to tag $($resourceId)"
 
 $tags = (Get-AzTag -ResourceId $resourceId).Properties
