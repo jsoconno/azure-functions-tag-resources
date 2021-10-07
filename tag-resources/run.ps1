@@ -136,12 +136,6 @@ Write-Host "AuthorizationScope: $($AuthorizationScope)"
 
 Write-Host $eventGridEvent.data.claims.value
 
-# Test if the requestor or the authorization scope is null.  If so, exit the process.
-if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
-    Write-Host "Requestor or Authorization Scope is null."
-    Exit;
-}
-
 # Ignore actions that contain the following strings by exiting the process.
 $Ignore = @("Microsoft.Resources/deployments", "Microsoft.Resources/tags", "Microsoft.Resources/tags", "Microsoft.Authorization/policies", "microsoft.insights/components/Annotations/write")
 foreach ($Case in $Ignore) {
@@ -165,6 +159,12 @@ if ($null -eq $Requestor) {
             $Requestor = $PrincipalId
         }
     }
+}
+
+# Test if the requestor or the authorization scope is null.  If so, exit the process.
+if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
+    Write-Host "Requestor or Authorization Scope is null."
+    Exit;
 }
 
 # Get the resource id of the parent resource that will be tagged.
