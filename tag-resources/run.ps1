@@ -79,55 +79,60 @@ function Get-ParentResourceId {
     Return $Result
 }
 
-function Get-Requestor {
-    <#
-        .SYNOPSIS
-            Gets the requestor (caller) of a particular action in Azure.
-        .DESCRIPTION
-            Returns the name of the user, principal, or other identity used for creating or modifying a resource in Azure.
-        .INPUTS
-            Requestor is the value returned from the event when getting the claim name
-        .OUTPUTS
-            The name of the identity that requested the action to happen.
-        .EXAMPLE
-            Get-Requestor -Requestor $eventGridEvent.data.claims.name
-        .LINK
-            None
-        .NOTES
-            None
-    #>
+# function Get-Requestor {
+#     <#
+#         .SYNOPSIS
+#             Gets the requestor (caller) of a particular action in Azure.
+#         .DESCRIPTION
+#             Returns the name of the user, principal, or other identity used for creating or modifying a resource in Azure.
+#         .INPUTS
+#             Requestor is the value returned from the event when getting the claim name
+#         .OUTPUTS
+#             The name of the identity that requested the action to happen.
+#         .EXAMPLE
+#             Get-Requestor -Requestor $eventGridEvent.data.claims.name
+#         .LINK
+#             None
+#         .NOTES
+#             None
+#     #>
 
-    param(
-        [string]$Requestor
-    )
+#     param(
+#         [string]$Requestor
+#     )
 
-    # Perform logic to test is the requestor is null.
-    if ($null -eq $Requestor) {
-        # If the requestor is null, check to see if the requestor is a service principal.
-        if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
-            # If the request is a service principal, attempt to get the principal name.
-            $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
-            $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
-            # If that fails, let the user konw there is likely a permissions issue.
-            if ($null -eq $Requestor) {
-                Write-Host "The identity does not have permission read the application from the directory."
-                # Set the requestor back to the principal id if there is a failure getting the name from Azure.
-                $Requestor = $PrincipalId
-            }
-        }
-    } else {
-        $Requestor = $Requestor
-    }
+#     # Perform logic to test is the requestor is null.
+#     if ($null -eq $Requestor) {
+#         # If the requestor is null, check to see if the requestor is a service principal.
+#         if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
+#             # If the request is a service principal, attempt to get the principal name.
+#             $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
+#             $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
+#             # If that fails, let the user konw there is likely a permissions issue.
+#             if ($null -eq $Requestor) {
+#                 Write-Host "The identity does not have permission read the application from the directory."
+#                 # Set the requestor back to the principal id if there is a failure getting the name from Azure.
+#                 $Requestor = $PrincipalId
+#             }
+#         }
+#     } else {
+#         $Requestor = $Requestor
+#     }
 
-    # Return the requestor.
-    Return $Requestor
-}
+#     # Return the requestor.
+#     Return $Requestor
+# }
 
 # Set high level variables.
-$Requestor = Get-Requestor -Requestor $eventGridEvent.data.claims.name
+$Requestor = $eventGridEvent.data.claims.name # Get-Requestor -Requestor $eventGridEvent.data.claims.name
 $Action = $eventGridEvent.data.authorization.action
 $ActionTimestamp = "$((Get-Date).AddHours(-4).ToString()) EST"
 $AuthorizationScope = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
+
+Write-Host "Requestor: $($Requestor)"
+Write-Host "Action: $($Action)"
+Write-Host "ActionTimestamp: $($ActionTimestamp)"
+Write-Host "AuthorizationScope: $($AuthorizationScope)"
 
 Write-Host $eventGridEvent.data.claims.value
 
@@ -143,6 +148,22 @@ foreach ($Case in $Ignore) {
     if ($Action.ToLower() -match $Case.ToLower()) {
         Write-Host "Skipping the event matching the case $Case"
         Exit;
+    }
+}
+
+# Perform logic to test is the requestor is null.
+if ($null -eq $Requestor) {
+    # If the requestor is null, check to see if the requestor is a service principal.
+    if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
+        # If the request is a service principal, attempt to get the principal name.
+        $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
+        $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
+        # If that fails, let the user konw there is likely a permissions issue.
+        if ($null -eq $Requestor) {
+            Write-Host "The identity does not have permission read the application from the directory."
+            # Set the requestor back to the principal id if there is a failure getting the name from Azure.
+            $Requestor = $PrincipalId
+        }
     }
 }
 
