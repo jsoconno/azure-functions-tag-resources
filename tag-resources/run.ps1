@@ -77,7 +77,9 @@ if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
 Write-Host "Function input: $($AuthorizationScope)"
 $ResourceId = Get-ParentResourceId -ResourceId $AuthorizationScope # $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
 $StrangeId = $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
+$AnotherStrangeId = $AuthorizationScope.id
 Write-Host "Strange ID: $($StrangeId)"
+Write-Host "Another Strange ID: $($AnotherStrangeId)"
 Write-Host "Initial Resource ID: $($ResourceId)"
 $ResourceId = $ResourceId.replace("/providers/Microsoft.Resources/tags/default", "")
 $ResourceId = $ResourceId.replace("/blobServices/default", "")
