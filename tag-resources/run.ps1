@@ -38,6 +38,7 @@ function Get-ParentResourceId {
     }
 
     Write-Host "Function output: $($CurrentResourceId)"
+    Write-Host "Optional Function Output: $($CurrentResourceId.id)"
     Return $CurrentResourceId
 }
 
