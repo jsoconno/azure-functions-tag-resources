@@ -124,7 +124,7 @@ function Get-Requestor {
 # Set high level variables.
 $Requestor = Get-Requestor -Requestor $eventGridEvent.data.claims.name
 $Action = $eventGridEvent.data.authorization.action
-$ActionTimestamp = $(Get-Date)
+$ActionTimestamp = "$((Get-Date).AddHours(-4).ToString()) EST"
 $AuthorizationScope = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
 
 # Test if the requestor or the authorization scope is null.  If so, exit the process.
