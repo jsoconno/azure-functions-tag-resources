@@ -135,8 +135,6 @@ Write-Host "Action: $($Action)"
 Write-Host "ActionTimestamp: $($ActionTimestamp)"
 Write-Host "AuthorizationScope: $($AuthorizationScope)"
 
-Write-Host $eventGridEvent.data.claims.value
-
 # Test if the requestor or the authorization scope is null.  If so, exit the process.
 if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     Write-Host "Requestor or Authorization Scope is null."
