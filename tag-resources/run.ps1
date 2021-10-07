@@ -127,6 +127,8 @@ $Action = $eventGridEvent.data.authorization.action
 $ActionTimestamp = "$((Get-Date).AddHours(-4).ToString()) EST"
 $AuthorizationScope = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
 
+Write-Host $eventGridEvent.data.claims
+
 # Test if the requestor or the authorization scope is null.  If so, exit the process.
 if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     Write-Host "Requestor or Authorization Scope is null."
