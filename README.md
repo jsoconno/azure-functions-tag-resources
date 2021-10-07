@@ -1,6 +1,6 @@
 # Overview
 
-The purpose of this code is to manage the Function responsible for tagging resources based on an event captured by a core Event Grid Subscription.
+The purpose of this Azure function is to tagging resources with details about who created or modified resources and when based on an event captured by a core Event Grid Subscription.
 
 # Setup
 
