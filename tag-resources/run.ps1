@@ -20,7 +20,7 @@ function Get-ParentResourceId {
             try {
                 try {
                     Write-Host "Running tagging test..."
-                    Get-AzTag -ResourceId $CurrentResourceId
+                    Get-AzTag -ResourceId $CurrentResourceId -ErrorAction SilentlyContinue
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
                 }
@@ -73,7 +73,7 @@ if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     exit;
 }
 
-$ResourceId = $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
+$ResourceId = Get-ParentResourceId -ResourceId $AuthorizationScope # $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
 Write-Host "Initial Resource ID: $($ResourceId)"
 $ResourceId = $ResourceId.replace("/providers/Microsoft.Resources/tags/default", "")
 $ResourceId = $ResourceId.replace("/blobServices/default", "")
