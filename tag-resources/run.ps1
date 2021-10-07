@@ -3,45 +3,61 @@ param($eventGridEvent, $TriggerMetadata)
 function Get-ParentResourceId {
 
     param(
-        $ResourceId
+        [string]$ResourceId,
+        [array]$IgnoreList = @('subscriptions', 'resourceGroups', 'providers'),
+        [array]$CleanList = @("/providers/Microsoft.Resources/tags/default", "/blobServices/default")
     )
 
+    # Create an array of each element in the resource id.
     $ResourceIdList = $ResourceId -Split '/'
-    # This should be created as a parameter
-    $IgnoreList = @('subscriptions', 'resourceGroups', 'providers')
-    $CleanList = @("/providers/Microsoft.Resources/tags/default", "/blobServices/default")
-
+    
+    # Using the items in the array, construct a new id to tag starting with the longest and moving backwards.
     for ($ia=$ResourceIdList.length-1; $ia -ge 0; $ia--) {
+
+        # For each id, set the current list, create the current id, and identify the current head for ignore actions.
         $CurrentResourceIdList = $ResourceIdList[0..($ia)]
         $CurrentResourceId = $CurrentResourceIdList -Join '/'
         $CurrentHead = $CurrentResourceIdList[-1]
-        if (!($IgnoreList -Contains $CurrentHead)) {
-            Write-Host "Validating ability to tag $($CurrentResourceId)" 
+
+        # Perform logic to determine if a resource is taggable.
+        if (!($IgnoreList -contains $CurrentHead)) {
+
+            # Clear all errors to start
             $Error.Clear()
+
+            # Try to get tags based on the resource id
             try {
                 try {
-                    Write-Host "Running tagging test..."
+                    Write-Host "Running tagging test for $($CurrentResourceId)"
+                    # Store the id of the resulting object from calling Get-AzTag (this value is different from the actual resource id).
                     $Result = (Get-AzTag -ResourceId $CurrentResourceId -ErrorAction Stop).id
                 } catch {
+                    # Log results of failed tests.
                     Write-Host "Test failed." -ForegroundColor Red
                 }
             } catch {
+                # Capture exceptions.
                 Throw $_.Exception
                 Write-Host "$($CurrentResourceId) cannot be tagged.  Searching for parent."
             }
             if (!$Error) {
+                # Log results of passed tests.
                 Write-Host "Test passed." -ForegroundColor Green
                 Break
             }
         } else {
-            Write-Host "Skipping resource $($CurrentResourceId)."
+            # Log results of ignored tests.
+            Write-Host "Ignoring resource $($CurrentResourceId)."
         }
     }
 
+    # Remove text from the id output from the Get-AzTag object to get to the base resource.
+    # This was done rather than 
     foreach ($String in $CleanList) {
         $Result = $Result.Replace($String, "")
     }
 
+    # Return the result from the function.
     Return $Result
 }
 
@@ -51,78 +67,75 @@ function Get-Requestor {
         $Requestor
     )
 
+    # Perform logic to test is the requestor is null.
     if ($null -eq $Requestor) {
+        # If the requestor is null, check to see if the requestor is a service principal.
         if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
+            # If the request is a service principal, attempt to get the principal name.
             $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
             $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
+            # If that fails, let the user konw there is likely a permissions issue.
             if ($null -eq $Requestor) {
                 Write-Host "The identity does not have permission read the application from the directory."
+                # Set the requestor back to the principal id if there is a failure getting the name from Azure.
                 $Requestor = $PrincipalId
             }
         }
     }
 
+    # Return the requestor.
     Return $Requestor
 }
 
+# Set high level variables.
 $Requestor = Get-Requestor -Requestor $eventGridEvent.data.claims.name
 $Action = $eventGridEvent.data.authorization.action
+$ActionTimestamp = $(Get-Date)
 $AuthorizationScope = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
-$EventTimestamp = $eventGridEvent.data.$eventTimestamp
+$EventProperties = $eventGridEvent.data.Properties
 
-Write-Host "Authorization Scope: $($AuthorizationScope)"
-Write-Host "Event Timestamp: $($EventTimestamp)"
+Write-Host "Event Properties: $($EventProperties)"
 
+# Test if the requestor or the authorization scope is null.  If so, exit the process.
 if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     Write-Host "Requestor or Authorization Scope is null."
-    exit;
+    Exit;
 }
 
-Write-Host "Function input: $($AuthorizationScope)"
+# Get the resource id of the parent resource that will be tagged.
 $ResourceId = Get-ParentResourceId -ResourceId $AuthorizationScope # $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
-$StrangeId = $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
-$AnotherStrangeId = $AuthorizationScope.id
-Write-Host "Strange ID: $($StrangeId)"
-Write-Host "Another Strange ID: $($AnotherStrangeId)"
-Write-Host "Initial Resource ID: $($ResourceId)"
-$ResourceId = $ResourceId.replace("/providers/Microsoft.Resources/tags/default", "")
-$ResourceId = $ResourceId.replace("/blobServices/default", "")
-Write-Host "Clean Resource ID: $($ResourceId)"
 
-Write-Host "Operation Name Properties: $($eventGridEvent.data.operationName.Properties)"
-
-# cean this up
-$Ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "Microsoft.Authorization/policies/auditIfNotExists/action", "microsoft.insights/components/Annotations/write")
-
+# Ignore actions that contain the following strings by exiting the process.
+$Ignore = @("Microsoft.Resources/deployments", "Microsoft.Resources/tags", "Microsoft.Resources/tags", "Microsoft.Authorization/policies", "microsoft.insights/components/Annotations/write")
 foreach ($Case in $Ignore) {
-    if ($Action -match $Case) {
+    if ($Action.ToLower() -match $Case.ToLower()) {
         Write-Host "Skipping the event matching the case $Case"
-        exit;
+        Exit;
     }
 }
 
-Write-Host "Attempting to tag $($ResourceId)"
-
+# Get the current tags for the identified parent resource.
 $Tags = (Get-AzTag -ResourceId $ResourceId).Properties
 
-Write-Host $Tags
-
+# Tag the resource based on whether or not this is the first time it is being deployed or modified in some way.
 if (!($Tags.TagsProperty.ContainsKey('CreatedBy')) -or ($null -eq $Tags)) {
-    Write-Host "Adding CreatedBy tags."
+    Write-Host "Adding tags stating the resource $($ResourceId) was created on $($ActionTimestamp) by $($Requestor) with action $($Action)."
+    # Create tag map to merge with the existing tags.
     $Tag = @{
         CreatedBy = $Requestor;
-        CreatedDate = $(Get-Date);
+        CreatedDate = $ActionTimestamp;
         LastOperation = $Action;
     }
+    # Update tags.
     Update-AzTag -ResourceId $ResourceId -Operation Merge -Tag $Tag
-    Write-Host "Added CreatedBy tag with user: $Requestor"
 } else {
-    Write-Host "Adding ModifiedBy tags."
+    Write-Host "Adding tags stating the resource $($ResourceId) was modified on $($ActionTimestamp) by $($Requestor) with action $($Action)."
+    # Create tag map to merge with the existing tags.
     $Tag = @{
         LastModifiedBy = $Requestor;
-        LastModifiedDate = $(Get-Date);
+        LastModifiedDate = $ActionTimestamp;
         LastOperation = $Action;
     }
+    # Update tags.
     Update-AzTag -ResourceId $ResourceId -Operation Merge -Tag $Tag
-    Write-Host "Added or updated ModifiedBy tag with user: $Requestor"
 }
