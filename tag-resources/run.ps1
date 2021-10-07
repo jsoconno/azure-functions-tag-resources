@@ -104,16 +104,21 @@ function Get-Requestor {
     # Perform logic to test is the requestor is null.
     if ($null -eq $Requestor) {
         # If the requestor is null, check to see if the requestor is a service principal.
+        Write-Host "Principal Type: $($eventGridEvent.data.authorization.evidence.principalType)"
         if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
             # If the request is a service principal, attempt to get the principal name.
             $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
+            Write-Host "Principal ID: $($PrincipalId)"
             $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
+            Write-Host "Requestor Output: $($Requestor)"
             # If that fails, let the user konw there is likely a permissions issue.
             if ($null -eq $Requestor) {
                 Write-Host "The identity does not have permission read the application from the directory."
                 # Set the requestor back to the principal id if there is a failure getting the name from Azure.
                 $Requestor = $PrincipalId
             }
+        } else {
+            Write-Host "This happened."
         }
     }
 
