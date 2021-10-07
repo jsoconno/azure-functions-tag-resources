@@ -1,6 +1,24 @@
 param($eventGridEvent, $TriggerMetadata)
 
 function Get-ParentResourceId {
+    <#
+        .SYNOPSIS
+            Attempts to find the parent resource that needs to be tagged based on a resource update.
+        .DESCRIPTION
+            Traverses the resource id and searches for the first available taggable resource.
+        .INPUTS
+            ResourceId is the ID of the resource from Azure.
+            IgnoreList is a list of items along the path to ignore when considering what should be tested for taggability.
+            CleanList is a list of strings that should be cleaned from the result returned by the function.
+        .OUTPUTS
+            The ID of the parent resource for which a change was made.
+        .EXAMPLE
+            Get-ParentResourceId -ResourceId $AuthorizationScope
+        .LINK
+            None
+        .NOTES
+            The baseline resource id was not used as the output because of some identified issues where non-taggable resources were sucessful in calling Get-AzTag.
+    #>
 
     param(
         [string]$ResourceId,
@@ -62,9 +80,25 @@ function Get-ParentResourceId {
 }
 
 function Get-Requestor {
+    <#
+        .SYNOPSIS
+            Gets the requestor (caller) of a particular action in Azure.
+        .DESCRIPTION
+            Returns the name of the user, principal, or other identity used for creating or modifying a resource in Azure.
+        .INPUTS
+            Requestor is the value returned from the event when getting the claim name
+        .OUTPUTS
+            The name of the identity that requested the action to happen.
+        .EXAMPLE
+            Get-Requestor -Requestor $eventGridEvent.data.claims.name
+        .LINK
+            None
+        .NOTES
+            None
+    #>
 
     param(
-        $Requestor
+        [string]$Requestor
     )
 
     # Perform logic to test is the requestor is null.
