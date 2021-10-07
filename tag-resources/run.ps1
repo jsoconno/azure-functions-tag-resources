@@ -126,9 +126,6 @@ $Requestor = Get-Requestor -Requestor $eventGridEvent.data.claims.name
 $Action = $eventGridEvent.data.authorization.action
 $ActionTimestamp = $(Get-Date)
 $AuthorizationScope = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
-$EventProperties = $eventGridEvent.data.Properties
-
-Write-Host "Event Properties: $($EventProperties)"
 
 # Test if the requestor or the authorization scope is null.  If so, exit the process.
 if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {

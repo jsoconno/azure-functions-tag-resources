@@ -1,8 +1,10 @@
 function Remove-Tag {
+
     param(
         $ResourceID,
         $TagKey
     )
+    
     try {
         $Resource = Get-AzResource -ResourceId $ResourceID -ErrorAction Stop
         $Resource.ForEach{

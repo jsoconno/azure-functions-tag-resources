@@ -1,9 +1,11 @@
 function Add-Tag {
+
     param(
         $ResourceID,
         $TagKey,
         $TagValue
     )
+    
     try {
         $Resource.ForEach{
             if (!($_.Tags.ContainsKey($TagKey))) {
