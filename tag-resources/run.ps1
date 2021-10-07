@@ -7,6 +7,7 @@ function Get-ParentResourceId {
     )
 
     $ResourceIdList = $ResourceId -Split '/'
+    # This should be created as a parameter
     $IgnoreList = @('subscriptions', 'resourceGroups', 'providers')
 
     for ($ia=$ResourceIdList.length-1; $ia -ge 0; $ia--) {
@@ -67,6 +68,11 @@ $EventTimestamp = $eventGridEvent.data.$eventTimestamp
 Write-Host "Authorization Scope: $($AuthorizationScope)"
 Write-Host "Event Timestamp: $($EventTimestamp)"
 
+if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
+    Write-Host "Requestor or Authorization Scope is null."
+    exit;
+}
+
 $ResourceId = $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
 Write-Host "Initial Resource ID: $($ResourceId)"
 $ResourceId = $ResourceId.replace("/providers/Microsoft.Resources/tags/default", "")
@@ -74,11 +80,6 @@ $ResourceId = $ResourceId.replace("/blobServices/default", "")
 Write-Host "Clean Resource ID: $($ResourceId)"
 
 Write-Host "Operation Name Properties: $($eventGridEvent.data.operationName.Properties)"
-
-if (($null -eq $Requestor) -or ($null -eq $ResourceId)) {
-    Write-Host "Requestor or Resource ID is null."
-    exit;
-}
 
 # cean this up
 $Ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "Microsoft.Authorization/policies/auditIfNotExists/action")
