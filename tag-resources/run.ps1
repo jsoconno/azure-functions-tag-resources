@@ -18,7 +18,7 @@ function Get-ParentResourceId {
             try {
                 try {
                     Write-Host "Running tagging test..."
-                    Get-AzTag -ResourceId $CurrentResourceID -ErrorAction SilentlyContinue
+                    Get-AzTag -ResourceId $CurrentResourceID
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
                 }
@@ -64,6 +64,7 @@ if (($null -eq $Requestor) -or ($null -eq $resourceId)) {
     exit;
 }
 
+# cean this up
 $ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "Microsoft.Authorization/policies/auditIfNotExists/action")
 
 foreach ($case in $ignore) {
