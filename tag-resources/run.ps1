@@ -136,15 +136,6 @@ Write-Host "AuthorizationScope: $($AuthorizationScope)"
 
 Write-Host $eventGridEvent.data.claims.value
 
-# Ignore actions that contain the following strings by exiting the process.
-$Ignore = @("Microsoft.Resources/deployments", "Microsoft.Resources/tags", "Microsoft.Resources/tags", "Microsoft.Authorization/policies", "microsoft.insights/components/Annotations/write")
-foreach ($Case in $Ignore) {
-    if ($Action.ToLower() -match $Case.ToLower()) {
-        Write-Host "Skipping the event matching the case $Case"
-        Exit;
-    }
-}
-
 # Perform logic to test is the requestor is null.
 if ($null -eq $Requestor) {
     # If the requestor is null, check to see if the requestor is a service principal.
@@ -165,6 +156,15 @@ if ($null -eq $Requestor) {
 if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     Write-Host "Requestor or Authorization Scope is null."
     Exit;
+}
+
+# Ignore actions that contain the following strings by exiting the process.
+$Ignore = @("Microsoft.Resources/deployments", "Microsoft.Resources/tags", "Microsoft.Resources/tags", "Microsoft.Authorization/policies", "microsoft.insights/components/Annotations/write")
+foreach ($Case in $Ignore) {
+    if ($Action.ToLower() -match $Case.ToLower()) {
+        Write-Host "Skipping the event matching the case $Case"
+        Exit;
+    }
 }
 
 # Get the resource id of the parent resource that will be tagged.
