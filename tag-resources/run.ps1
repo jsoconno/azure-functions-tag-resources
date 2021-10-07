@@ -115,8 +115,6 @@ function Get-Requestor {
                 $Requestor = $PrincipalId
             }
         }
-    } else {
-        $Requestor = $Requestor
     }
 
     # Return the requestor.
