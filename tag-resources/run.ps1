@@ -122,6 +122,9 @@ function Get-Requestor {
 }
 
 # Set high level variables.
+Write-Host "Initial Requestor: $($eventGridEvent.data.claims.name)"
+Write-Host "Initial Principal: $($eventGridEvent.data.authorization.evidence.principalId)"
+
 $Requestor = Get-Requestor -Requestor $eventGridEvent.data.claims.name
 $Action = $eventGridEvent.data.authorization.action
 $ActionTimestamp = "$((Get-Date).AddHours(-4).ToString()) EST"
