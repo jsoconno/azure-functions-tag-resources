@@ -133,9 +133,6 @@ if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     Exit;
 }
 
-# Get the resource id of the parent resource that will be tagged.
-$ResourceId = Get-ParentResourceId -ResourceId $AuthorizationScope # $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
-
 # Ignore actions that contain the following strings by exiting the process.
 $Ignore = @("Microsoft.Resources/deployments", "Microsoft.Resources/tags", "Microsoft.Resources/tags", "Microsoft.Authorization/policies", "microsoft.insights/components/Annotations/write")
 foreach ($Case in $Ignore) {
@@ -144,6 +141,9 @@ foreach ($Case in $Ignore) {
         Exit;
     }
 }
+
+# Get the resource id of the parent resource that will be tagged.
+$ResourceId = Get-ParentResourceId -ResourceId $AuthorizationScope # $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
 
 # Get the current tags for the identified parent resource.
 $Tags = (Get-AzTag -ResourceId $ResourceId).Properties
