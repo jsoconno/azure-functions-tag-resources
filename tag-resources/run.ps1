@@ -9,6 +9,7 @@ function Get-ParentResourceId {
     $ResourceIdList = $ResourceId -Split '/'
     # This should be created as a parameter
     $IgnoreList = @('subscriptions', 'resourceGroups', 'providers')
+    $CleanList = @("/providers/Microsoft.Resources/tags/default", "/blobServices/default")
 
     for ($ia=$ResourceIdList.length-1; $ia -ge 0; $ia--) {
         $CurrentResourceIdList = $ResourceIdList[0..($ia)]
@@ -20,7 +21,7 @@ function Get-ParentResourceId {
             try {
                 try {
                     Write-Host "Running tagging test..."
-                    Get-AzTag -ResourceId $CurrentResourceId -ErrorAction SilentlyContinue
+                    $Result = (Get-AzTag -ResourceId $CurrentResourceId -ErrorAction Stop).id
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
                 }
@@ -37,9 +38,11 @@ function Get-ParentResourceId {
         }
     }
 
-    Write-Host "Function output: $($CurrentResourceId)"
-    Write-Host $($CurrentResourceId).id
-    Return $CurrentResourceId
+    foreach ($String in $CleanList) {
+        $Result = $Result.Replace($String, "")
+    }
+
+    Return $Result
 }
 
 function Get-Requestor {

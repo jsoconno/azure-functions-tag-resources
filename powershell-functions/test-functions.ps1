@@ -41,45 +41,51 @@ function Remove-Tag {
 }
 
 function Get-ParentResourceId {
+
     param(
-        $ResourceID
+        $ResourceId
     )
 
-    $ResourceIDList = $ResourceID -Split '/'
+    $ResourceIdList = $ResourceId -Split '/'
+    # This should be created as a parameter
     $IgnoreList = @('subscriptions', 'resourceGroups', 'providers')
+    $CleanList = @("/providers/Microsoft.Resources/tags/default", "/blobServices/default")
 
-    for ($ia=$ResourceIDList.length-1; $ia -ge 0; $ia--) {
-        $CurrentResourceIDList = $ResourceIDList[0..($ia)]
-        $CurrentResourceID = $CurrentResourceIDList -Join '/'
-        $CurrentHead = $CurrentResourceIDList[-1]
+    for ($ia=$ResourceIdList.length-1; $ia -ge 0; $ia--) {
+        $CurrentResourceIdList = $ResourceIdList[0..($ia)]
+        $CurrentResourceId = $CurrentResourceIdList -Join '/'
+        $CurrentHead = $CurrentResourceIdList[-1]
         if (!($IgnoreList -Contains $CurrentHead)) {
-            Write-Host "Validating ability to tag $($CurrentResourceID)" 
-            $Error.clear()
+            Write-Host "Validating ability to tag $($CurrentResourceId)" 
+            $Error.Clear()
             try {
                 try {
                     Write-Host "Running tagging test..."
-                    # Add-Tag -ResourceID $CurrentResourceID -TagKey "Test" -TagValue "Test" -ErrorAction SilentlyContinue
-                    # Remove-Tag -ResourceID $CurrentResourceID -TagKey "Test" -ErrorAction SilentlyContinue
-                    Get-AzTag -ResourceId $CurrentResourceID
+                    $Result = (Get-AzTag -ResourceId $CurrentResourceId -ErrorAction Stop).id
                 } catch {
                     Write-Host "Test failed." -ForegroundColor Red
                 }
             } catch {
                 Throw $_.Exception
-                Write-Host "$($CurrentResourceID) cannot be tagged.  Searching for parent."
+                Write-Host "$($CurrentResourceId) cannot be tagged.  Searching for parent."
             }
             if (!$Error) {
                 Write-Host "Test passed." -ForegroundColor Green
                 Break
             }
         } else {
-            Write-Host "Skipping resource $($CurrentResourceID)."
+            Write-Host "Skipping resource $($CurrentResourceId)."
         }
     }
 
-    Return $CurrentResourceID
+    foreach ($String in $CleanList) {
+        $Result = $Result.Replace($String, "")
+    }
+
+    Return $Result
 }
 
 $ResourceIDPass = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.KeyVault/vaults/kvl-use-infrabot-dev"
 $ResourceIDFail = "/subscriptions/affa3e80-5743-41c0-9f42-178059561abc/resourceGroups/rgp-use-infrabot-dev/providers/Microsoft.Storage/storageAccounts/stouseinfrabotdev/blobServices/default/containers/delete"
-Get-ParentResourceId -ResourceID $ResourceIDFail
+$result = Get-ParentResourceId -ResourceID $ResourceIDFail
+Write-Host $result
