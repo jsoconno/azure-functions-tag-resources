@@ -37,6 +37,7 @@ function Get-ParentResourceId {
         }
     }
 
+    Write-Host "Function output: $($CurrentResourceId)"
     Return $CurrentResourceId
 }
 
@@ -73,7 +74,10 @@ if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
     exit;
 }
 
+Write-Host "Function input: $($AuthorizationScope)"
 $ResourceId = Get-ParentResourceId -ResourceId $AuthorizationScope # $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
+$StrangeId = $(Get-ParentResourceId -ResourceId $AuthorizationScope).id
+Write-Host "Strange ID: $($StrangeId)"
 Write-Host "Initial Resource ID: $($ResourceId)"
 $ResourceId = $ResourceId.replace("/providers/Microsoft.Resources/tags/default", "")
 $ResourceId = $ResourceId.replace("/blobServices/default", "")
@@ -82,7 +86,7 @@ Write-Host "Clean Resource ID: $($ResourceId)"
 Write-Host "Operation Name Properties: $($eventGridEvent.data.operationName.Properties)"
 
 # cean this up
-$Ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "Microsoft.Authorization/policies/auditIfNotExists/action")
+$Ignore = @("providers/Microsoft.Resources/deployments", "providers/Microsoft.Resources/tags", "Microsoft.Resources/tags/write", "Microsoft.Authorization/policies/auditIfNotExists/action", "microsoft.insights/components/Annotations/write")
 
 foreach ($Case in $Ignore) {
     if ($Action -match $Case) {
