@@ -101,6 +101,11 @@ function Get-Requestor {
         [string]$Requestor
     )
 
+    Write-Host "The function ran"
+    Write-Host "The value for Requestor is _$($Requestor)_"
+    Write-Host "The length of requestor is $($Requestor.Lengh)"
+
+
     # Perform logic to test is the requestor is null.
     if ($null -eq $Requestor) {
         # If the requestor is null, check to see if the requestor is a service principal.
