@@ -107,10 +107,12 @@ function Get-Requestor {
         if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
             # If the request is a service principal, attempt to get the principal name.
             $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
+            # To run this command, your user or principal will need read permissions on apps in the directory (Delegated Graph.Directory.Read).
             $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
             # If that fails, let the user konw there is likely a permissions issue.
             if ($null -eq $Requestor) {
                 # Set the requestor back to the principal id if there is a failure getting the name from Azure.
+                Write-Host "The principal used does not have permissions to read applications in the directory."
                 $Requestor = $PrincipalId
             }
         }
