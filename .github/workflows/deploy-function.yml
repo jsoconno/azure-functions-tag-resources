@@ -12,14 +12,15 @@ on:
   push:
     branches:
       - hotfix-*
+      - feature-*
  
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
  
 env:
-  FUNCTION_NAME: fun-use-core-dev    # This name needs to be globally unique
+  FUNCTION_NAME: fa-eus-core-d    # This name needs to be globally unique
   SCRIPT_PATH: '.'      # set this to the path where your PowerShell code is stored.
-  RESOURCE_GROUP: RGP-USE-CORE-DEV
+  RESOURCE_GROUP: rg-eus-core-d
   LOCATION: 'eastus'
  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
