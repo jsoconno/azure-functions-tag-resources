@@ -98,7 +98,7 @@ function Get-Requestor {
     #>
 
     param(
-        [string]$Requestor
+        $Requestor
     )
 
     Write-Host "The function ran"
