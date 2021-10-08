@@ -17,7 +17,7 @@ function Get-Requestor {
     #>
 
     param(
-        [string]$Requestor
+        $Requestor
     )
 
     # Perform logic to test is the requestor is null.
@@ -29,7 +29,6 @@ function Get-Requestor {
             $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
             # If that fails, let the user konw there is likely a permissions issue.
             if ($null -eq $Requestor) {
-                Write-Host "The identity does not have permission read the application from the directory."
                 # Set the requestor back to the principal id if there is a failure getting the name from Azure.
                 $Requestor = $PrincipalId
             }
