@@ -112,7 +112,7 @@ function Get-Requestor {
             # If that fails, let the user konw there is likely a permissions issue.
             if ($null -eq $Requestor) {
                 # Set the requestor back to the principal id if there is a failure getting the name from Azure.
-                Write-Host "The principal used does not have permissions to read applications in the directory."
+                Write-Host "The principal used does not have the required Graph Directory.Read permissions or your Function App identity provider is not configured correctly.  For more information, see https://docs.microsoft.com/en-us/azure/app-service/configure-authentication-provider-aad."
                 $Requestor = $PrincipalId
             }
         }
