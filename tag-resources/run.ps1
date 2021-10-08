@@ -104,6 +104,7 @@ function Get-Requestor {
     Write-Host "The function ran"
     Write-Host "The value for Requestor is _$($Requestor)_"
     Write-Host "The length of requestor is $($Requestor.Lengh)"
+    Write-Host "The type of requestor is $($Requestor.GetType())"
 
 
     # Perform logic to test is the requestor is null.
