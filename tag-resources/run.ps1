@@ -101,30 +101,18 @@ function Get-Requestor {
         $Requestor
     )
 
-    Write-Host "The function ran"
-    Write-Host "The value for Requestor is _$($Requestor)_"
-    Write-Host "The length of requestor is $($Requestor.Lengh)"
-    Write-Host "The type of requestor is $($Requestor.GetType())"
-
-
     # Perform logic to test is the requestor is null.
     if ($null -eq $Requestor) {
         # If the requestor is null, check to see if the requestor is a service principal.
-        Write-Host "Principal Type: $($eventGridEvent.data.authorization.evidence.principalType)"
         if ($eventGridEvent.data.authorization.evidence.principalType -eq "ServicePrincipal") {
             # If the request is a service principal, attempt to get the principal name.
             $PrincipalId = $eventGridEvent.data.authorization.evidence.principalId
-            Write-Host "Principal ID: $($PrincipalId)"
             $Requestor = (Get-AzADServicePrincipal -ObjectId $PrincipalId).DisplayName
-            Write-Host "Requestor Output: $($Requestor)"
             # If that fails, let the user konw there is likely a permissions issue.
             if ($null -eq $Requestor) {
-                Write-Host "The identity does not have permission read the application from the directory."
                 # Set the requestor back to the principal id if there is a failure getting the name from Azure.
                 $Requestor = $PrincipalId
             }
-        } else {
-            Write-Host "This happened."
         }
     }
 
@@ -133,18 +121,10 @@ function Get-Requestor {
 }
 
 # Set high level variables.
-Write-Host "Initial Requestor: $($eventGridEvent.data.claims.name)"
-Write-Host "Initial Principal: $($eventGridEvent.data.authorization.evidence.principalId)"
-
 $Requestor = Get-Requestor -Requestor $eventGridEvent.data.claims.name
 $Action = $eventGridEvent.data.authorization.action
 $ActionTimestamp = "$((Get-Date).AddHours(-4).ToString()) EST"
 $AuthorizationScope = $eventGridEvent.data.authorization.scope # $eventGridEvent.data.resourceUri
-
-Write-Host "Requestor: $($Requestor)"
-Write-Host "Action: $($Action)"
-Write-Host "ActionTimestamp: $($ActionTimestamp)"
-Write-Host "AuthorizationScope: $($AuthorizationScope)"
 
 # Test if the requestor or the authorization scope is null.  If so, exit the process.
 if (($null -eq $Requestor) -or ($null -eq $AuthorizationScope)) {
